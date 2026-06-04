@@ -1,25 +1,62 @@
 'use client'
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import { Icon } from 'leaflet'
+import { useEffect, useState } from 'react'
+import importDynamic from 'next/dynamic'
 import { Phone, Mail, MapPin, Clock } from 'lucide-react'
 import 'leaflet/dist/leaflet.css'
-import dynamic from 'next/dynamic'
 
-// Create custom icon for the marker
-const customIcon = new Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-})
+const MapContainer = importDynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+) as any
 
+const TileLayer = importDynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+) as any
+
+const Marker = importDynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+) as any
+
+const Popup = importDynamic(
+  () => import('react-leaflet').then((mod) => mod.Popup),
+  { ssr: false }
+) as any
 export default function Location() {
-  // Karkala correct coordinates from Bing Maps
-  const coordinates = [13.192626953125, 75.00312805175781]
+  const [customIcon, setCustomIcon] = useState<any>(null)
+  const coordinates: [number, number] = [13.192626953125, 75.00312805175781]
 
+  // 2. Initialize the Leaflet Icon inside useEffect so it safely bypasses the server build
+  useEffect(() => {
+    const initIcon = async () => {
+      //@ts-ignore
+      const leafletModule = await import('leaflet') as any;
+      const L = leafletModule.default || leafletModule;
+      
+      const icon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+      });
+      setCustomIcon(icon);
+    };
+
+    initIcon();
+  }, []);
+
+  // 3. Prevent rendering the map components until the custom icon is ready in the browser
+  if (!customIcon) {
+    return (
+      <div className="pt-20 min-h-screen flex items-center justify-center">
+        <p className="text-gray-500 font-medium">Loading Map Details...</p>
+      </div>
+    )
+  }
   return (
     <main className="pt-20">
       {/* Hero Section */}
