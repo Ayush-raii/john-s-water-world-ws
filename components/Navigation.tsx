@@ -24,7 +24,7 @@ export default function Navigation() {
           <div className="w-8 h-8 bg-[#0F172A] rounded flex items-center justify-center">
             <span className="text-white font-bold text-lg">W</span>
           </div>
-          <span className="font-bold text-[#0F172A] hidden sm:inline">John&apos;s Water World</span>
+          <span className="font-bold text-[#0F172A]">John&apos;s Water World</span>
         </Link>
 
         {/* Desktop Navigation */}
